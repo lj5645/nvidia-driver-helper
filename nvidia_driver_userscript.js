@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      2.7
-// @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录
+// @version      2.8
+// @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce/RTX/Quadro/Tesla 等全产品线）
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
 // @match        https://www.nvidia.cn/*
 // @match        https://gfwsl.geforce.com/*
+// @match        https://www.nvidia.com/download/*
+// @match        https://www.nvidia.cn/download/*
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
@@ -22,7 +24,7 @@
         release: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.7', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.8', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -35,11 +37,11 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.7","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.8","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
-                'if(!url.includes("DriverManualLookup")&&!url.includes("processFind.aspx")&&!url.includes("AjaxDriverService")&&!url.includes("lookupValueSearch"))return url;' +
+                'if(!url.includes("DriverManualLookup")&&!url.includes("DriverLookup")&&!url.includes("processFind.aspx")&&!url.includes("AjaxDriverService")&&!url.includes("lookupValueSearch")&&!url.includes("find.aspx")&&!url.includes("driverResults"))return url;' +
                 'console.log("[NVDriverHelper] 拦截到请求:",url.substring(0,100));' +
                 'var modified=url;' +
                 'if(modified.includes("numberOfResults=")){' +
@@ -212,8 +214,11 @@
     XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
         if (url && typeof url === 'string') {
             if (url.includes('DriverManualLookup') || 
+                url.includes('DriverLookup') ||
                 url.includes('processFind.aspx') ||
-                url.includes('AjaxDriverService')) {
+                url.includes('AjaxDriverService') ||
+                url.includes('lookupValueSearch') ||
+                url.includes('find.aspx')) {
                 url = modifyUrlParams(url);
                 console.log('[NVDriverHelper] XHR 修改:', url.substring(0, 100));
             }
@@ -225,8 +230,11 @@
     window.fetch = function(url, options) {
         if (url && typeof url === 'string') {
             if (url.includes('DriverManualLookup') || 
+                url.includes('DriverLookup') ||
                 url.includes('processFind.aspx') ||
-                url.includes('AjaxDriverService')) {
+                url.includes('AjaxDriverService') ||
+                url.includes('lookupValueSearch') ||
+                url.includes('find.aspx')) {
                 url = modifyUrlParams(url);
                 console.log('[NVDriverHelper] Fetch 修改:', url.substring(0, 100));
             }
