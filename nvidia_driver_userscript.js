@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.4
 // @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce Game Ready/Studio 驱动）
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
@@ -20,11 +20,10 @@
         numberOfResults: 10,
         driverType: 'all',
         forceStandard: false,
-        version: '',
-        versionPrefix: ''
+        version: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.3', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.4', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -37,7 +36,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.3","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.4","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
@@ -79,15 +78,6 @@
                         'modified+="&version="+v;' +
                     '}' +
                     'console.log("[NVDriverHelper] 指定版本:",v);' +
-                '}' +
-                'if(CONFIG.versionPrefix){' +
-                    'var prefix=CONFIG.versionPrefix.toString().substring(0,2);' +
-                    'if(modified.includes("version=")){' +
-                        'modified=modified.replace(/version=[^&]*/,"version="+prefix);' +
-                    '}else{' +
-                        'modified+="&version="+prefix;' +
-                    '}' +
-                    'console.log("[NVDriverHelper] 版本前缀匹配(前2位):",prefix);' +
                 '}' +
                 'console.log("%c[NVDriverHelper] 修改后URL:","color:green",modified.substring(0,200));' +
                 'return modified;' +
@@ -272,7 +262,7 @@
             'font-size:11px;margin-top:10px;text-align:center;display:none}' +
             '</style>' +
             '<span class="minimize" title="最小化">−</span>' +
-            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.3</span></h3>' +
+            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.4</span></h3>' +
             '<div class="content">' +
             '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="10" max="50"></label>' +
             '<label>驱动类型:<select id="hdv-driverType">' +
@@ -282,7 +272,6 @@
             '</select></label>' +
             '<label><input type="checkbox" id="hdv-forceStandard"' + (CONFIG.forceStandard ? ' checked' : '') + '>强制 Standard 驱动</label>' +
             '<label>版本号 (精确匹配):<input type="text" id="hdv-version" value="' + CONFIG.version + '" placeholder="如: 566.36"></label>' +
-            '<label>版本前缀 (取前2位):<input type="text" id="hdv-versionPrefix" value="' + CONFIG.versionPrefix + '" placeholder="如: 57 匹配57开头"></label>' +
             '<div style="display:flex;gap:10px;margin-top:10px">' +
             '<button id="hdv-apply" style="flex:1">应用配置</button>' +
             '<button id="hdv-reset" style="flex:1;background:#333;color:#fff">重置</button>' +
@@ -304,7 +293,6 @@
             CONFIG.driverType = document.getElementById('hdv-driverType').value;
             CONFIG.forceStandard = document.getElementById('hdv-forceStandard').checked;
             CONFIG.version = document.getElementById('hdv-version').value.trim();
-            CONFIG.versionPrefix = document.getElementById('hdv-versionPrefix').value.trim();
             localStorage.setItem('nv-driver-helper-config', JSON.stringify(CONFIG));
             console.log('[NVDriverHelper] 配置已保存:', CONFIG);
         };
@@ -324,12 +312,10 @@
             CONFIG.driverType = 'all';
             CONFIG.forceStandard = false;
             CONFIG.version = '';
-            CONFIG.versionPrefix = '';
             document.getElementById('hdv-numResults').value = 10;
             document.getElementById('hdv-driverType').value = 'all';
             document.getElementById('hdv-forceStandard').checked = false;
             document.getElementById('hdv-version').value = '';
-            document.getElementById('hdv-versionPrefix').value = '';
             injectInterceptor(CONFIG);
             console.log('[NVDriverHelper] 配置已重置为默认值');
         });
