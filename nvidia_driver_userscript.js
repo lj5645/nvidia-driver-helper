@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      3.4
+// @version      3.5
 // @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce Game Ready/Studio 驱动）
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
@@ -23,7 +23,7 @@
         version: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.4', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.5', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -36,7 +36,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.4","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.5","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
@@ -262,7 +262,7 @@
             'font-size:11px;margin-top:10px;text-align:center;display:none}' +
             '</style>' +
             '<span class="minimize" title="最小化">−</span>' +
-            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.4</span></h3>' +
+            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.5</span></h3>' +
             '<div class="content">' +
             '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="10" max="50"></label>' +
             '<label>驱动类型:<select id="hdv-driverType">' +
@@ -289,7 +289,16 @@
         });
 
         var saveConfig = function() {
-            CONFIG.numberOfResults = parseInt(document.getElementById('hdv-numResults').value) || 10;
+            var numResults = parseInt(document.getElementById('hdv-numResults').value) || 10;
+            if (numResults > 50) {
+                numResults = 50;
+                document.getElementById('hdv-numResults').value = 50;
+            }
+            if (numResults < 10) {
+                numResults = 10;
+                document.getElementById('hdv-numResults').value = 10;
+            }
+            CONFIG.numberOfResults = numResults;
             CONFIG.driverType = document.getElementById('hdv-driverType').value;
             CONFIG.forceStandard = document.getElementById('hdv-forceStandard').checked;
             CONFIG.version = document.getElementById('hdv-version').value.trim();
