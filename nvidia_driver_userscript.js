@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      2.8
+// @version      2.9
 // @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce/RTX/Quadro/Tesla 等全产品线）
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
 // @match        https://www.nvidia.cn/*
 // @match        https://gfwsl.geforce.com/*
-// @match        https://www.nvidia.com/download/*
-// @match        https://www.nvidia.cn/download/*
+// @match        https://www.nvidia.cn/drivers/*
+// @match        https://www.nvidia.cn/geforce/drivers/*
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
@@ -24,7 +24,7 @@
         release: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.8', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.9', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -37,7 +37,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.8","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.9","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
