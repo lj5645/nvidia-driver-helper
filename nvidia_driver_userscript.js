@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      2.3
+// @version      2.4
 // @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
@@ -15,14 +15,14 @@
     'use strict';
 
     var CONFIG = {
-        numberOfResults: 100,
+        numberOfResults: 50,
         driverType: 'grd',
         forceStandard: false,
         version: '',
         release: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.3', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.4', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -35,7 +35,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.3","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.4","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
@@ -265,9 +265,9 @@
             'font-size:11px;margin-top:10px;text-align:center;display:none}' +
             '</style>' +
             '<span class="minimize" title="最小化">−</span>' +
-            '<h3>NVIDIA 驱动查询增强 <span class="status">v2.3</span></h3>' +
+            '<h3>NVIDIA 驱动查询增强 <span class="status">v2.4</span></h3>' +
             '<div class="content">' +
-            '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="1" max="500"></label>' +
+            '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="1" max="50"></label>' +
             '<label>驱动类型:<select id="hdv-driverType">' +
             '<option value="grd"' + (CONFIG.driverType === 'grd' ? ' selected' : '') + '>Game Ready</option>' +
             '<option value="studio"' + (CONFIG.driverType === 'studio' ? ' selected' : '') + '>Studio</option>' +
