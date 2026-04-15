@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      3.0
-// @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce/RTX/Quadro/Tesla 等全产品线）
+// @version      3.1
+// @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录（支持 GeForce Game Ready/Studio 驱动）
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
 // @match        https://www.nvidia.cn/*
@@ -20,11 +20,10 @@
         numberOfResults: 10,
         driverType: 'all',
         forceStandard: false,
-        version: '',
-        releaseBranch: ''
+        version: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.0', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v3.1', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -37,7 +36,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.0","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v3.1","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
@@ -63,14 +62,6 @@
                     'modified=modified.replace(/upCRD=null/g,"upCRD=0");' +
                     'if(!modified.includes("isWHQL="))modified+="&isWHQL=1&upCRD=0";' +
                     'console.log("[NVDriverHelper] Game Ready驱动模式");' +
-                '}else if(CONFIG.driverType==="pb"){' +
-                    'modified=modified.replace(/dch=\\d/g,"dch=0");' +
-                    'if(!modified.includes("dch="))modified+="&dch=0";' +
-                    'console.log("[NVDriverHelper] Production Branch模式");' +
-                '}else if(CONFIG.driverType==="nfb"){' +
-                    'modified=modified.replace(/dch=\\d/g,"dch=1");' +
-                    'if(!modified.includes("dch="))modified+="&dch=1";' +
-                    'console.log("[NVDriverHelper] New Feature Branch模式");' +
                 '}else{' +
                     'console.log("[NVDriverHelper] 全部驱动模式");' +
                 '}' +
@@ -87,12 +78,6 @@
                         'modified+="&version="+v;' +
                     '}' +
                     'console.log("[NVDriverHelper] 指定版本:",v);' +
-                '}' +
-                'if(CONFIG.releaseBranch){' +
-                    'var rb=CONFIG.releaseBranch;' +
-                    'var searchPattern=new RegExp(rb+"\\\\.","i");' +
-                    'modified=modified.replace(/osVersion=[^&]*/gi,"osVersion="+rb);' +
-                    'console.log("[NVDriverHelper] 版本系列过滤:",rb);' +
                 '}' +
                 'console.log("%c[NVDriverHelper] 修改后URL:","color:green",modified.substring(0,200));' +
                 'return modified;' +
@@ -255,7 +240,7 @@
             'background:linear-gradient(135deg,#76b900 0%,#5a9100 100%);' +
             'color:white;padding:15px;border-radius:8px;z-index:2147483647;' +
             'font-family:Arial,sans-serif;box-shadow:0 4px 15px rgba(0,0,0,0.3);' +
-            'min-width:300px}' +
+            'min-width:280px}' +
             '#nv-driver-helper-panel *{box-sizing:border-box}' +
             '#nv-driver-helper-panel h3{margin:0 0 10px;font-size:14px;display:flex;align-items:center;gap:8px}' +
             '#nv-driver-helper-panel .status{font-size:10px;background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:10px}' +
@@ -275,35 +260,18 @@
             'font-size:11px;margin-top:10px;line-height:1.4}' +
             '#nv-driver-helper-panel .success{background:rgba(0,100,0,0.3);padding:8px;border-radius:4px;' +
             'font-size:11px;margin-top:10px;text-align:center;display:none}' +
-            '#nv-driver-helper-panel .section{border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;margin-top:8px}' +
-            '#nv-driver-helper-panel .section-title{font-size:11px;opacity:0.8;margin-bottom:5px}' +
             '</style>' +
             '<span class="minimize" title="最小化">−</span>' +
-            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.0</span></h3>' +
+            '<h3>NVIDIA 驱动查询增强 <span class="status">v3.1</span></h3>' +
             '<div class="content">' +
             '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="10" max="50"></label>' +
-            '<div class="section">' +
-            '<div class="section-title">GeForce 驱动类型:</div>' +
             '<label>驱动类型:<select id="hdv-driverType">' +
             '<option value="all"' + (CONFIG.driverType === 'all' ? ' selected' : '') + '>全部</option>' +
             '<option value="grd"' + (CONFIG.driverType === 'grd' ? ' selected' : '') + '>Game Ready</option>' +
             '<option value="studio"' + (CONFIG.driverType === 'studio' ? ' selected' : '') + '>Studio</option>' +
             '</select></label>' +
-            '</div>' +
-            '<div class="section">' +
-            '<div class="section-title">RTX/Quadro 驱动类型:</div>' +
-            '<label>分支类型:<select id="hdv-branchType">' +
-            '<option value="all"' + (CONFIG.driverType === 'all' ? ' selected' : '') + '>全部</option>' +
-            '<option value="pb"' + (CONFIG.driverType === 'pb' ? ' selected' : '') + '>Production Branch</option>' +
-            '<option value="nfb"' + (CONFIG.driverType === 'nfb' ? ' selected' : '') + '>New Feature Branch</option>' +
-            '</select></label>' +
-            '</div>' +
             '<label><input type="checkbox" id="hdv-forceStandard"' + (CONFIG.forceStandard ? ' checked' : '') + '>强制 Standard 驱动</label>' +
-            '<div class="section">' +
-            '<div class="section-title">版本筛选:</div>' +
             '<label>版本号 (精确匹配):<input type="text" id="hdv-version" value="' + CONFIG.version + '" placeholder="如: 566.36"></label>' +
-            '<label>版本系列 (如 570):<input type="text" id="hdv-releaseBranch" value="' + CONFIG.releaseBranch + '" placeholder="如: 570"></label>' +
-            '</div>' +
             '<div style="display:flex;gap:10px;margin-top:10px">' +
             '<button id="hdv-apply" style="flex:1">应用配置</button>' +
             '<button id="hdv-reset" style="flex:1;background:#333;color:#fff">重置</button>' +
@@ -322,18 +290,9 @@
 
         var saveConfig = function() {
             CONFIG.numberOfResults = parseInt(document.getElementById('hdv-numResults').value) || 10;
-            var driverType = document.getElementById('hdv-driverType').value;
-            var branchType = document.getElementById('hdv-branchType').value;
-            if (branchType !== 'all' && driverType === 'all') {
-                CONFIG.driverType = branchType;
-            } else if (driverType !== 'all') {
-                CONFIG.driverType = driverType;
-            } else {
-                CONFIG.driverType = 'all';
-            }
+            CONFIG.driverType = document.getElementById('hdv-driverType').value;
             CONFIG.forceStandard = document.getElementById('hdv-forceStandard').checked;
             CONFIG.version = document.getElementById('hdv-version').value.trim();
-            CONFIG.releaseBranch = document.getElementById('hdv-releaseBranch').value.trim();
             localStorage.setItem('nv-driver-helper-config', JSON.stringify(CONFIG));
             console.log('[NVDriverHelper] 配置已保存:', CONFIG);
         };
@@ -353,13 +312,10 @@
             CONFIG.driverType = 'all';
             CONFIG.forceStandard = false;
             CONFIG.version = '';
-            CONFIG.releaseBranch = '';
             document.getElementById('hdv-numResults').value = 10;
             document.getElementById('hdv-driverType').value = 'all';
-            document.getElementById('hdv-branchType').value = 'all';
             document.getElementById('hdv-forceStandard').checked = false;
             document.getElementById('hdv-version').value = '';
-            document.getElementById('hdv-releaseBranch').value = '';
             injectInterceptor(CONFIG);
             console.log('[NVDriverHelper] 配置已重置为默认值');
         });
