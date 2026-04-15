@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NVIDIA 驱动查询增强
 // @namespace    http://tampermonkey.net/
-// @version      2.6
+// @version      2.7
 // @description  修改 NVIDIA 驱动查询参数，获取更多驱动记录
 // @author       NVDriverHelper
 // @match        https://www.nvidia.com/*
@@ -16,13 +16,13 @@
 
     var CONFIG = {
         numberOfResults: 10,
-        driverType: 'grd',
+        driverType: 'all',
         forceStandard: false,
         version: '',
         release: ''
     };
 
-    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.6', 'color: #76b900; font-weight: bold; font-size: 14px;');
+    console.log('%c[NVDriverHelper] 用户脚本已加载 v2.7', 'color: #76b900; font-weight: bold; font-size: 14px;');
 
     try {
         var savedConfig = localStorage.getItem('nv-driver-helper-config');
@@ -35,7 +35,7 @@
     function createInterceptorCode(config) {
         return '(function(){' +
             'var CONFIG=' + JSON.stringify(config) + ';' +
-            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.6","color:#76b900;font-weight:bold");' +
+            'console.log("%c[NVDriverHelper] 拦截器已注入 v2.7","color:#76b900;font-weight:bold");' +
             'console.log("[NVDriverHelper] 当前配置:",CONFIG);' +
             'function modifyParams(url){' +
                 'if(!url||typeof url!=="string")return url;' +
@@ -54,13 +54,15 @@
                     'modified=modified.replace(/upCRD=null/g,"upCRD=1");' +
                     'if(!modified.includes("isWHQL="))modified+="&isWHQL=0&upCRD=1";' +
                     'console.log("[NVDriverHelper] Studio驱动模式: isWHQL=0, upCRD=1");' +
-                '}else{' +
+                '}else if(CONFIG.driverType==="grd"){' +
                     'modified=modified.replace(/isWHQL=\\d/g,"isWHQL=1");' +
                     'modified=modified.replace(/isWHQL=null/g,"isWHQL=1");' +
                     'modified=modified.replace(/upCRD=\\d/g,"upCRD=0");' +
                     'modified=modified.replace(/upCRD=null/g,"upCRD=0");' +
                     'if(!modified.includes("isWHQL="))modified+="&isWHQL=1&upCRD=0";' +
                     'console.log("[NVDriverHelper] Game Ready驱动模式: isWHQL=1, upCRD=0");' +
+                '}else{' +
+                    'console.log("[NVDriverHelper] 全部驱动模式: 不修改驱动类型");' +
                 '}' +
                 'if(CONFIG.forceStandard){' +
                     'modified=modified.replace(/dch=1/g,"dch=0");' +
@@ -173,7 +175,7 @@
             if (!modified.includes('isWHQL=')) {
                 modified += '&isWHQL=0&upCRD=1';
             }
-        } else {
+        } else if (CONFIG.driverType === 'grd') {
             modified = modified.replace(/isWHQL=\d/, 'isWHQL=1');
             modified = modified.replace(/isWHQL=null/, 'isWHQL=1');
             modified = modified.replace(/upCRD=\d/, 'upCRD=0');
@@ -265,10 +267,11 @@
             'font-size:11px;margin-top:10px;text-align:center;display:none}' +
             '</style>' +
             '<span class="minimize" title="最小化">−</span>' +
-            '<h3>NVIDIA 驱动查询增强 <span class="status">v2.6</span></h3>' +
+            '<h3>NVIDIA 驱动查询增强 <span class="status">v2.7</span></h3>' +
             '<div class="content">' +
             '<label>显示驱动数量:<input type="number" id="hdv-numResults" value="' + CONFIG.numberOfResults + '" min="10" max="50"></label>' +
             '<label>驱动类型:<select id="hdv-driverType">' +
+            '<option value="all"' + (CONFIG.driverType === 'all' ? ' selected' : '') + '>全部</option>' +
             '<option value="grd"' + (CONFIG.driverType === 'grd' ? ' selected' : '') + '>Game Ready</option>' +
             '<option value="studio"' + (CONFIG.driverType === 'studio' ? ' selected' : '') + '>Studio</option>' +
             '</select></label>' +
@@ -313,12 +316,12 @@
         document.getElementById('hdv-reset').addEventListener('click', function() {
             localStorage.removeItem('nv-driver-helper-config');
             CONFIG.numberOfResults = 10;
-            CONFIG.driverType = 'grd';
+            CONFIG.driverType = 'all';
             CONFIG.forceStandard = false;
             CONFIG.version = '';
             CONFIG.release = '';
             document.getElementById('hdv-numResults').value = 10;
-            document.getElementById('hdv-driverType').value = 'grd';
+            document.getElementById('hdv-driverType').value = 'all';
             document.getElementById('hdv-forceStandard').checked = false;
             document.getElementById('hdv-version').value = '';
             document.getElementById('hdv-release').value = '';
